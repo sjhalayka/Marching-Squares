@@ -239,17 +239,17 @@ void display_func(void)
 	}
 	glEnd();
 
-	//// Render image outline edge length.
-	//glColor3f(0, 0, 1);
-	//glLineWidth(2);
-	//glBegin(GL_LINES);
-	//for(size_t i = 0; i < line_segments.size(); i++)
-	//{
-	//	glVertex2f(line_segments[i].vertex[0].x, line_segments[i].vertex[0].y);
-	//	glVertex2f(line_segments[i].vertex[1].x, line_segments[i].vertex[1].y);
-	//}
-	//glEnd();
-	//glLineWidth(1);
+	// Render image outline edge length.
+	glColor3f(0, 0, 1);
+	glLineWidth(2);
+	glBegin(GL_LINES);
+	for(size_t i = 0; i < line_segments.size(); i++)
+	{
+		glVertex2f(line_segments[i].vertex[0].x, line_segments[i].vertex[0].y);
+		glVertex2f(line_segments[i].vertex[1].x, line_segments[i].vertex[1].y);
+	}
+	glEnd();
+	glLineWidth(1);
 
 	glFlush();
 }

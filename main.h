@@ -22,7 +22,10 @@ void reshape_func(int width, int height);
 void display_func(void);
 
 
-#include <GL/glut.h>
+// g++ *.cpp -framework GLUT -framework OpenGL
+#include <GLUT/glut.h>
+
+
 
 // A C++ namespace wouldn't hurt here...
 
