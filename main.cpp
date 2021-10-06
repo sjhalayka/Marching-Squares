@@ -4,6 +4,9 @@
 // Cat image from: http://www.iacuc.arizona.edu/training/cats/index.html
 int main(int argc, char **argv)
 {
+	size_t boundary_count = 0;
+	size_t interior_count = 0;
+
 	// Example command for standard binary image: ms figure1.tga 1e-3 0.5
 	// Example command for blurred binary image: ms figure3.tga 1e-3 0.5
 	// Example command for noise binary image: ms figure5.tga 1e-3 0.5
@@ -92,7 +95,21 @@ int main(int argc, char **argv)
 			g.value[2] = luma.pixel_data[(y + 1)*luma.px + (x + 1)];
 			g.value[3] = luma.pixel_data[y*luma.px + (x + 1)];
 
+			size_t curr_ls_size = line_segments.size();
+			size_t curr_tris_size = triangles.size();
+
 			g.generate_primitives(line_segments, triangles, isovalue);
+
+			size_t new_ls_size = line_segments.size();
+			size_t new_tris_size = triangles.size();
+
+			if (curr_ls_size != new_ls_size)
+				boundary_count++;
+
+			if (curr_tris_size != new_tris_size)
+				interior_count++;
+
+
 		}
 	}
 
@@ -150,106 +167,8 @@ int main(int argc, char **argv)
 	cout << "Triangles:         " << triangles.size() << endl;
 	cout << "Area:              " << area << endl;
 	cout << "Length/Area:       " << sa << endl;
-	cout << "Photon wavelength: " << 6.0/sa << endl;
 
-
-	// Render the Targa image underneath the associated geometric primitives,
-	// using OpenGL fixed-pipeline functionality.
-	render_image(argc, argv);
+	cout << "Box counting dimension of boundary: " << logf(static_cast<float>(boundary_count)) / logf(1.0f / static_cast<float>(step_size)) << endl;
 
 	return 0;
-}
-
-void render_image(int &argc, char ** &argv)
-{
-	// Initialize OpenGL.
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_RGB);
-	glutInitWindowPosition(0, 0);
-	glutInitWindowSize(win_x, win_y);
-	win_id = glutCreateWindow("Marching Squares");
-	glutIdleFunc(idle_func);
-	glutReshapeFunc(reshape_func);
-	glutDisplayFunc(display_func);
-
-	glShadeModel(GL_FLAT);
-	glClearColor(background_colour, background_colour, background_colour, 1);
-
-	// Begin rendering.
-	glutMainLoop();
-
-	// Cleanup OpenGL.
-	glutDestroyWindow(win_id);
-}
-
-void idle_func(void)
-{
-	glutPostRedisplay();
-}
-
-// Resize window.
-void reshape_func(int width, int height)
-{
-	if(width < 1)
-		width = 1;
-
-	if(height < 1)
-		height = 1;
-
-	win_x = width;
-	win_y = height;
-
-	// Viewport setup.
-	glutSetWindow(win_id);
-	glutReshapeWindow(win_x, win_y);
-	glViewport(0, 0, win_x, win_y);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45.0f, static_cast<GLfloat>(win_x)/static_cast<GLfloat>(win_y), 0.1, 10);
-	gluLookAt(0, 0, camera_z, 0, 0, 0, 0, 1, 0);
-}
-
-// Visualization.
-void display_func(void)
-{
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	// Scale all geometric primitives so that template width == 1.
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glScalef(inverse_width, inverse_width, inverse_width);
-
-	// Render a dark background.
-	glColor3f(0, 0, 0);
-	glBegin(GL_QUADS);
-		glVertex2f(-template_width/2.0, template_height/2.0);
-		glVertex2f(-template_width/2.0, -template_height/2.0);
-		glVertex2f(template_width/2.0, -template_height/2.0);
-		glVertex2f(template_width/2.0, template_height/2.0);
-	glEnd();
-
-	// Render image area.
-	glColor3f(1, 1, 1);
-	glBegin(GL_TRIANGLES);
-	for(size_t i = 0; i < triangles.size(); i++)
-	{
-		glVertex2f(triangles[i].vertex[0].x, triangles[i].vertex[0].y);
-		glVertex2f(triangles[i].vertex[1].x, triangles[i].vertex[1].y);
-		glVertex2f(triangles[i].vertex[2].x, triangles[i].vertex[2].y);
-	}
-	glEnd();
-
-	// Render image outline edge length.
-	glColor3f(0, 0, 1);
-	glLineWidth(2);
-	glBegin(GL_LINES);
-	for(size_t i = 0; i < line_segments.size(); i++)
-	{
-		glVertex2f(line_segments[i].vertex[0].x, line_segments[i].vertex[0].y);
-		glVertex2f(line_segments[i].vertex[1].x, line_segments[i].vertex[1].y);
-	}
-	glEnd();
-	glLineWidth(1);
-
-	glFlush();
 }

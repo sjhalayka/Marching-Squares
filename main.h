@@ -15,26 +15,6 @@ using std::endl;
 #include <sstream>
 using std::istringstream;
 
-
-void render_image(int &argc, char ** &argv);
-void idle_func(void);
-void reshape_func(int width, int height);
-void display_func(void);
-
-
-// g++ *.cpp -framework GLUT -framework OpenGL
-#include <GLUT/glut.h>
-
-
-
-// A C++ namespace wouldn't hurt here...
-
-// OpenGL viewport parameters.
-GLint win_id = 0;
-GLint win_x = 800, win_y = 800;
-GLfloat camera_z = 1.25;
-double background_colour = 0.33;
-
 // Image objects and parameters.
 tga tga_texture;
 float_grayscale luma;
